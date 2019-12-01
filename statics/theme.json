@@ -1,0 +1,10 @@
+{
+  "defaultTheme": "light",
+  "themes": {
+    "light": {
+      "white": "#ffffff",
+      "primaryDark": "#0062d4",
+      "primary": "#0075ff"
+    }
+  }
+}

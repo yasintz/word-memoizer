@@ -1,0 +1,9 @@
+{
+  "files.exclude": {
+    "dist/**": true,
+    ".eslintcache": true,
+    "tests/__coverage__/**": true
+  },
+  "eslint.options": { "configFile": ".eslintrc.js" },
+  "eslint.enable": true
+}
