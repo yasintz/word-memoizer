@@ -10,6 +10,7 @@ const ContainerWrapper = styled.div`
 `;
 
 const StyledFullPage = styled.div`
+  padding-left: 48px;
   width: 100%;
 `;
 

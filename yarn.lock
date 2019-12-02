@@ -2206,6 +2206,11 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.3.tgz#bdfd69d61e464dcc81b25159c270d75a73c1a636"
   integrity sha512-Il2DtDVRGDcqjDtE+rF8iqg1CArehSK84HZJCT7AMITlyXRBpuPhqGLDQMowraqqu1coEaimg4ZOqggt6L6L+A==
 
+"@types/lodash@^4.14.149":
+  version "4.14.149"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.149.tgz#1342d63d948c6062838fbf961012f74d4e638440"
+  integrity sha512-ijGqzZt/b7BfzcK9vTrS6MFljQRPn5BFWOx8oE0GYxribu6uV+aA9zZuXI1zc/etK9E8nrgdoF2+LgUw7+9tJQ==
+
 "@types/minimatch@*":
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.3.tgz#3dca0e3f33b200fc7d1139c0cd96c1268cadfd9d"
@@ -14112,10 +14117,10 @@ yargs@^7.0.0:
     y18n "^3.2.1"
     yargs-parser "^5.0.0"
 
-yasintz-api-calls@^0.0.11:
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/yasintz-api-calls/-/yasintz-api-calls-0.0.11.tgz#1c597be11f696219b54933fe8735f2690caa2455"
-  integrity sha512-DSsgzbmVUiTfG3Z4Kfl3Iq3U6gP8uovNOzeKvhZkEtW0uE+JJb9McOciLWsuvP0ivqQy7Vzuc1Ub3cWrveoCjA==
+yasintz-api-calls@^0.0.15:
+  version "0.0.15"
+  resolved "https://registry.yarnpkg.com/yasintz-api-calls/-/yasintz-api-calls-0.0.15.tgz#d39ba7027a0571feef02f61aab1d4a2652786a40"
+  integrity sha512-FwO8fgerMbNHXlPCv6iMTAGJcKk6LADzjPvPzBFngWaJ8LsM6E1uHkJKs+3c/LxfOxwxwom22UefXagV/iF4CA==
   dependencies:
     deep-equal "^1.1.1"
     yasintz-narrow-object "^0.0.7"

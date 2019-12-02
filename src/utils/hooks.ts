@@ -18,12 +18,21 @@ function usePrevious<T>(value: T, setInitial?: boolean): T {
   return ref.current;
 }
 
-function useMemoWithPrevDeps<T, D>(factory: (prevDeps: ReadonlyArray<D>) => T, deps: ReadonlyArray<D>): T {
+function useMemoWithPrevDeps<T, D>(
+  factory: (prevDeps: ReadonlyArray<D>, prevResult: T) => T,
+  deps: ReadonlyArray<D>,
+): T {
+  const prevValRef = React.useRef<T>(undefined);
   const depsMemo = React.useMemo(() => deps, deps); // eslint-disable-line
   const prevDeps = usePrevious(depsMemo);
-  const factoryMemo = React.useCallback(() => factory(prevDeps || []), deps); // eslint-disable-line
+  const factoryMemo = React.useCallback((prevVal: T) => factory(prevDeps || [], prevVal), deps); // eslint-disable-line
 
-  return React.useMemo(() => factoryMemo(), [factoryMemo]);
+  return React.useMemo(() => {
+    const value = factoryMemo(prevValRef.current);
+    prevValRef.current = value;
+
+    return value;
+  }, [factoryMemo]);
 }
 
 function useKeepValue<T>(value: T | undefined, wantedValue: T): T {
