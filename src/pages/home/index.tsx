@@ -7,8 +7,8 @@ import { Container } from '~/components/ui';
 import { queries } from '~/api';
 import { DAY_TYPE } from '~/api/utils';
 import { objectKeys } from '~/utils';
-import { Word } from '~/api/queries';
 import { DAY_TYPE_TITLE_MAP } from '~/utils/constants';
+import { Word } from '~/helpers';
 
 /* Home Helpers */
 interface HomeProps {}

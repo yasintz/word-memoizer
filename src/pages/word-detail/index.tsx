@@ -6,6 +6,8 @@ import styled from '~/styled';
 import { queries } from '~/api';
 import { Container } from '~/components/ui';
 import { Images } from './images';
+import { WordLinks } from './links';
+import { WordRelations } from './relation';
 
 /* WordDetail Helpers */
 interface WordDetailParams {
@@ -22,8 +24,20 @@ function WordDetail(props: React.PropsWithChildren<RouteComponentProps<WordDetai
   const { data: currentWord, loading: allWordsLoading } = useQuery(queries.getWord, {
     variables: { id: props.match.params.id },
   });
+
   const imageLinks = React.useMemo(() => {
     return lodash.get(currentWord, 'detail.images', []);
+  }, [currentWord]);
+
+  const wordLinks = React.useMemo(() => {
+    return lodash.get(currentWord, 'detail.links', []);
+  }, [currentWord]);
+
+  const wordRelations = React.useMemo(() => {
+    return lodash.get(currentWord, 'detail.relations', {
+      oppositeMeaningWordIds: [],
+      synonymWordIds: [],
+    });
   }, [currentWord]);
 
   if (allWordsLoading) {
@@ -38,6 +52,8 @@ function WordDetail(props: React.PropsWithChildren<RouteComponentProps<WordDetai
       <StyledWordDetailWrapper>
         <h1>{currentWord.text}</h1>
         <hr />
+        <WordLinks links={wordLinks} wordId={props.match.params.id} />
+        <WordRelations relations={wordRelations} wordId={props.match.params.id} />
         <Images images={imageLinks} wordId={props.match.params.id} />
       </StyledWordDetailWrapper>
     </Container>

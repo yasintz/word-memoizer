@@ -15,7 +15,6 @@ interface ImagesProps {
 
 const StyledImage = styled.img`
   width: 400px;
-  height: 400px;
   margin: 20px;
   object-fit: cover;
   border-radius: 8px;
@@ -24,31 +23,35 @@ const StyledImagesWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
 `;
+const StyledWordImagesWrapper = styled.div`
+  border: 1px solid black;
+  padding: 12px;
+`;
 
 /* Images Component  */
 function Images(props: React.PropsWithChildren<ImagesProps>) {
   /* Images Variables */
   const [imageLink, setImageLink] = React.useState('');
-  const { mutation: addImage } = useMutation(mutations.updateImageLinks, {
-    variables: { wordId: props.wordId, imageLinks: [...props.images, imageLink] },
+  const { mutation: addImage } = useMutation(mutations.addWordImageLink, {
+    variables: { wordId: props.wordId, imageLink },
   });
 
   /* Images Callbacks */
   /* Images Lifecycle  */
 
   return (
-    <div>
+    <StyledWordImagesWrapper>
       <label>
         Resim Ekleme :
-        <input onChange={e => setImageLink(e.target.value)} />
+        <input onChange={e => setImageLink(e.target.value)} value={imageLink} />
       </label>
-      <button type="button" onClick={() => addImage()}>
+      <button type="button" onClick={() => addImage().then(i => setImageLink(''))} disabled={!imageLink}>
         Ekle
       </button>
       <StyledImagesWrapper>
         {props.images.map(item => (
-          <div>
-            <StyledImage src={item} key={item} />
+          <div key={item}>
+            <StyledImage src={item} />
             <br />
             <a href={item} target="_blank" rel="noopener noreferrer">
               Ac
@@ -56,7 +59,7 @@ function Images(props: React.PropsWithChildren<ImagesProps>) {
           </div>
         ))}
       </StyledImagesWrapper>
-    </div>
+    </StyledWordImagesWrapper>
   );
 }
 const PureImages = React.memo(Images);

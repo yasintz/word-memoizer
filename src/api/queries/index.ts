@@ -1,32 +1,9 @@
 import axios from 'axios';
-import { getKeyByType, DAY_TYPE } from './utils';
-import { DATABASE_URL } from './constants';
-import { objectKeys } from '~/utils';
-
-export interface Word {
-  id: string;
-  text: string;
-  detail: {
-    images: string[];
-    links: { link: string; title: string }[];
-    relation: {
-      oppositeMeaning: string[];
-      synonym: string[];
-    };
-  };
-}
-
-const keys = objectKeys(DAY_TYPE).map(item => getKeyByType(DAY_TYPE[item]));
-
-export const getBrainTodayBrainWordsSchema = `
-    BrainType{
-     ${keys.join(';\n')}; 
-    }
-    @{
-      brain: BrainType;
-      * @getByKey(brain);
-    } 
-    `;
+import { Word, WordRelation, GetWordRelationsQueryResult } from '~/helpers';
+import { DAY_TYPE, getKeyByType } from '../utils';
+import { DATABASE_URL } from '../constants';
+import { getWordSchema, getBrainSchema, getBrainTodayBrainWordsSchema } from '../schemas';
+import { getBrainTodayBrainWordsResultHandler, getWordRelationsResultHandler } from './data-parser';
 
 interface Queries {
   getWords: () => Promise<Record<string, Word>>;
@@ -34,20 +11,28 @@ interface Queries {
   isRegisteredToday: () => Promise<{ registered: boolean }>;
   getBrainTodayBrainWords: () => Promise<Record<DAY_TYPE, string[]>>;
   getAllBrainIds: () => Promise<string[]>;
+  getWordRelations: (s: { relations: WordRelation }) => Promise<GetWordRelationsQueryResult>;
 }
 
 const queries: Queries = {
-  getWord: ({ id }) => {
+  getWordRelations: ({ relations }) => {
+    const usedIds = [...relations.oppositeMeaningWordIds, ...relations.synonymWordIds].join(';');
     const schema = `
+    WordType{${usedIds};}
     @{
-      words @getByKey(${id}); 
+      words: WordType;
       * @getByKey(words);
     } 
     `;
 
     return axios
+      .get(DATABASE_URL, { params: { schema } })
+      .then(({ data: { result } }) => getWordRelationsResultHandler(relations, result));
+  },
+  getWord: ({ id }) => {
+    return axios
       .get(DATABASE_URL, {
-        params: { schema },
+        params: { schema: getWordSchema(id) },
         headers: {
           'Content-Type': 'application/json',
         },
@@ -55,14 +40,7 @@ const queries: Queries = {
       .then(({ data }) => data.result);
   },
   getAllBrainIds: () => {
-    const schema = `
-   @{
-     brain;
-     * @getByKey(brain);
-   } 
-    `;
-
-    return axios.get(DATABASE_URL, { params: { schema } }).then(({ data }) => {
+    return axios.get(DATABASE_URL, { params: { schema: getBrainSchema } }).then(({ data }) => {
       const ids: string[] = [];
       Object.keys(data.result).forEach(key => {
         ids.push(...data.result[key]);
@@ -119,18 +97,7 @@ const queries: Queries = {
           'Content-Type': 'application/json',
         },
       })
-      .then(({ data }) => {
-        const result = {};
-        Object.keys(data.result).forEach(item => {
-          objectKeys(DAY_TYPE).forEach(type => {
-            if (item.indexOf(type) === 0) {
-              result[DAY_TYPE[type]] = data.result[item];
-            }
-          });
-        });
-
-        return result as Record<DAY_TYPE, any>;
-      });
+      .then(({ data }) => getBrainTodayBrainWordsResultHandler(data.result));
   },
 };
 

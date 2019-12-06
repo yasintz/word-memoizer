@@ -2,38 +2,65 @@ import axios from 'axios';
 import { makeid } from '~/utils';
 import { DATABASE_URL } from './constants';
 import { DAY_TYPE, getKeyByType, addDays } from './utils';
-import { getBrainTodayBrainWordsSchema } from './queries';
+import { getWordSchema, getBrainTodayBrainWordsSchema } from './schemas';
 
 interface Mutations {
   addWord: (s: { word: string }) => Promise<any>;
   registerWords: (s: { wordIds: string[] }) => Promise<any>;
-  updateImageLinks: (s: { wordId: string; imageLinks: string[] }) => Promise<any>;
+  addWordImageLink: (s: { wordId: string; imageLink: string }) => Promise<any>;
+  addWordLink: (s: { wordId: string; link: { link: string; title: string } }) => Promise<any>;
+  addWordRelation: (s: { wordId: string; relationWordId: string; type: 'opposite' | 'synonym' }) => Promise<any>;
 }
 
 const mutations: Mutations = {
-  updateImageLinks: ({ imageLinks, wordId }) => {
-    const schema = `
-  @{
-    words @getByKey(${wordId});
-    * @getByKey(words); 
-  }
-`;
-
+  addWordRelation: ({ relationWordId: realtionWordId, type, wordId }) => {
     return axios
       .put(
         DATABASE_URL,
         {
-          data: {
-            detail: {
-              images: imageLinks,
-            },
-          },
+          data: realtionWordId,
         },
         {
           params: {
-            action: 'deep-assign',
-            path: `words.${wordId}`,
-            schema,
+            action: 'push',
+            path: `words.${wordId}.detail.relations.${
+              type === 'opposite' ? 'oppositeMeaningWordIds' : 'synonymWordIds'
+            }`,
+            schema: getWordSchema(wordId),
+          },
+        },
+      )
+      .then(i => i.data.result);
+  },
+  addWordImageLink: ({ imageLink, wordId }) => {
+    return axios
+      .put(
+        DATABASE_URL,
+        {
+          data: imageLink,
+        },
+        {
+          params: {
+            action: 'push',
+            path: `words.${wordId}.detail.images`,
+            schema: getWordSchema(wordId),
+          },
+        },
+      )
+      .then(i => i.data.result);
+  },
+  addWordLink: ({ link, wordId }) => {
+    return axios
+      .put(
+        DATABASE_URL,
+        {
+          data: link,
+        },
+        {
+          params: {
+            action: 'push',
+            path: `words.${wordId}.detail.links`,
+            schema: getWordSchema(wordId),
           },
         },
       )

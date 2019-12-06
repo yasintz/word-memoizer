@@ -5,6 +5,7 @@ import styled, { colors } from '~/styled';
 import { queries, mutations } from '~/api';
 import { objectKeys } from '~/utils';
 import { Container, UIButton } from '~/components/ui';
+import { getBrainTodayBrainWordsResultHandler } from '~/api/queries/data-parser';
 
 /* WordRegister Helpers */
 interface WordRegisterProps {}
@@ -43,7 +44,10 @@ function WordRegister(props: React.PropsWithChildren<RouteComponentProps<WordReg
   const { mutation } = useMutation(mutations.registerWords, {
     variables: { wordIds: selectedWordIds },
     refetchQueries: [
-      refetchFactory(queries.getBrainTodayBrainWords, { type: 'chain' }),
+      refetchFactory(queries.getBrainTodayBrainWords, {
+        type: 'chain',
+        dataHandler: mr => getBrainTodayBrainWordsResultHandler(mr),
+      }),
       refetchFactory(queries.isRegisteredToday, { type: 'chain', dataHandler: () => ({ registered: true }) }),
     ],
   });
@@ -116,9 +120,8 @@ function WordRegister(props: React.PropsWithChildren<RouteComponentProps<WordReg
           {selectedWordIds.length === 5 && (
             <StyledButton
               onClick={() =>
-                mutation().then(d => {
-                  // props.history.push(`/`);
-                  return d;
+                mutation().then(() => {
+                  props.history.push(`/`);
                 })
               }
             >
