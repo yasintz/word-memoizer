@@ -16,7 +16,8 @@ interface Queries {
 
 const queries: Queries = {
   getWordRelations: ({ relations }) => {
-    const usedIds = [...relations.oppositeMeaningWordIds, ...relations.synonymWordIds].join(';');
+    const relationsObj = { oppositeMeaningWordIds: [], synonymWordIds: [], ...relations };
+    const usedIds = [...relationsObj.oppositeMeaningWordIds, ...relationsObj.synonymWordIds].join(';');
     const schema = `
     WordType{${usedIds};}
     @{
@@ -27,7 +28,7 @@ const queries: Queries = {
 
     return axios
       .get(DATABASE_URL, { params: { schema } })
-      .then(({ data: { result } }) => getWordRelationsResultHandler(relations, result));
+      .then(({ data: { result } }) => getWordRelationsResultHandler(relationsObj, result));
   },
   getWord: ({ id }) => {
     return axios

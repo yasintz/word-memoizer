@@ -33,7 +33,6 @@ function WordRelations(props: React.PropsWithChildren<WordRelationsProps>) {
   });
   const [isShownRelationAddComp, setIsShownRelationAddComp] = React.useState(false);
   /* WordRelations Callbacks */
-
   /* WordRelations Lifecycle  */
 
   return (
