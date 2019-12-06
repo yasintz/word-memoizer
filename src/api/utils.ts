@@ -28,7 +28,7 @@ function getKeyByType(type: DAY_TYPE, date?: Date) {
   const month = inlineDate.getMonth() + 1;
   const year = inlineDate.getFullYear();
 
-  return `${type}-${day}-${month}-${year}`;
+  return `${type}_${day}_${month}_${year}`;
 }
 function getAllKeys() {
   return objectKeys(DAY_TYPE).map(key => getKeyByType(DAY_TYPE[key]));

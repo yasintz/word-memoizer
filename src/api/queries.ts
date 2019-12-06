@@ -30,12 +30,30 @@ export const getBrainTodayBrainWordsSchema = `
 
 interface Queries {
   getWords: () => Promise<Record<string, Word>>;
+  getWord: (s: { id: string }) => Promise<Word>;
   isRegisteredToday: () => Promise<{ registered: boolean }>;
   getBrainTodayBrainWords: () => Promise<Record<DAY_TYPE, string[]>>;
   getAllBrainIds: () => Promise<string[]>;
 }
 
 const queries: Queries = {
+  getWord: ({ id }) => {
+    const schema = `
+    @{
+      words @getByKey(${id}); 
+      * @getByKey(words);
+    } 
+    `;
+
+    return axios
+      .get(DATABASE_URL, {
+        params: { schema },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(({ data }) => data.result);
+  },
   getAllBrainIds: () => {
     const schema = `
    @{
@@ -61,7 +79,7 @@ const queries: Queries = {
   getWords: () => {
     const schema = `
     @{
-      ...;
+      words;
       * @getByKey(words); 
     } 
     `;

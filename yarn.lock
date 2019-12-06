@@ -14117,10 +14117,10 @@ yargs@^7.0.0:
     y18n "^3.2.1"
     yargs-parser "^5.0.0"
 
-yasintz-api-calls@^0.0.15:
-  version "0.0.15"
-  resolved "https://registry.yarnpkg.com/yasintz-api-calls/-/yasintz-api-calls-0.0.15.tgz#d39ba7027a0571feef02f61aab1d4a2652786a40"
-  integrity sha512-FwO8fgerMbNHXlPCv6iMTAGJcKk6LADzjPvPzBFngWaJ8LsM6E1uHkJKs+3c/LxfOxwxwom22UefXagV/iF4CA==
+yasintz-api-calls@^0.0.19:
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/yasintz-api-calls/-/yasintz-api-calls-0.0.19.tgz#63df4661e8e2debaf5793e92077442a2133ee987"
+  integrity sha512-EYYVfseUXtuXhbHqe80rbNGEfQiVCIxqtW5DaoZV68stPXpnom0++Y+VG4PB2PU4SeWof72a9ugJpCQW2yKvsw==
   dependencies:
     deep-equal "^1.1.1"
     yasintz-narrow-object "^0.0.7"

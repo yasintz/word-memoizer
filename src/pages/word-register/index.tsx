@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { NavLink, RouteComponentProps, Redirect } from 'react-router-dom';
-import { useQuery, useMutation, RefetchQueryType } from 'yasintz-api-calls';
+import { useQuery, useMutation, refetchFactory } from 'yasintz-api-calls';
 import styled, { colors } from '~/styled';
 import { queries, mutations } from '~/api';
 import { objectKeys } from '~/utils';
@@ -10,7 +10,6 @@ import { Container, UIButton } from '~/components/ui';
 interface WordRegisterProps {}
 
 /* WordRegister Constants */
-const normalType: RefetchQueryType = 'normal';
 
 /* WordRegister Styles */
 const StyledWordRegisterWrapper = styled.div`
@@ -44,16 +43,8 @@ function WordRegister(props: React.PropsWithChildren<RouteComponentProps<WordReg
   const { mutation } = useMutation(mutations.registerWords, {
     variables: { wordIds: selectedWordIds },
     refetchQueries: [
-      {
-        query: queries.getBrainTodayBrainWords,
-        type: normalType,
-        variables: {},
-      },
-      {
-        query: queries.isRegisteredToday,
-        type: normalType,
-        variables: {},
-      },
+      refetchFactory(queries.getBrainTodayBrainWords, { type: 'chain' }),
+      refetchFactory(queries.isRegisteredToday, { type: 'chain', dataHandler: () => ({ registered: true }) }),
     ],
   });
 
