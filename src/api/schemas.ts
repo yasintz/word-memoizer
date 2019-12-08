@@ -11,9 +11,7 @@ const getWordSchema = (id: string) => `
     `;
 
 const getBrainTodayBrainWordsSchema = `
-    BrainType{
-     ${keys.join(';\n')}; 
-    }
+    BrainType{${keys.join(';')};}
     @{
       brain: BrainType;
       * @getByKey(brain);

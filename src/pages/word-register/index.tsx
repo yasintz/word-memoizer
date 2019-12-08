@@ -44,7 +44,7 @@ function WordRegister(props: React.PropsWithChildren<RouteComponentProps<WordReg
   const { mutation } = useMutation(mutations.registerWords, {
     variables: { wordIds: selectedWordIds },
     refetchQueries: [
-      refetchFactory(queries.getBrainTodayBrainWords, {
+      refetchFactory(queries.getBrainTodayBrains, {
         type: 'chain',
         dataHandler: mr => getBrainTodayBrainWordsResultHandler(mr),
       }),

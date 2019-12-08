@@ -5,10 +5,6 @@ import { NavLink } from 'react-router-dom';
 import styled from '~/styled';
 import { Container } from '~/components/ui';
 import { queries } from '~/api';
-import { DAY_TYPE } from '~/api/utils';
-import { objectKeys } from '~/utils';
-import { DAY_TYPE_TITLE_MAP } from '~/utils/constants';
-import { Word } from '~/helpers';
 
 /* Home Helpers */
 interface HomeProps {}
@@ -42,22 +38,14 @@ const StyledWordText = styled.span`
 
 /* Home Component  */
 function Home(props: React.PropsWithChildren<HomeProps>) {
-  const { data: allWords, loading: allWordsLoading } = useQuery(queries.getWords, { defaultValue: {} });
-  const { data: brains, loading: brainsLoading } = useQuery(queries.getBrainTodayBrainWords, { defaultValue: {} });
+  const { data: brains, loading: brainsLoading } = useQuery(queries.getBrainTodayBrains, { defaultValue: {} });
   const { data: status, loading: isRegisteredTodayLoading } = useQuery(queries.isRegisteredToday);
-  const sections = React.useMemo(() => {
-    const items: Array<{ title: string; words: Word[] }> = [];
-    objectKeys(DAY_TYPE).forEach(key => {
-      const currentItem = brains[DAY_TYPE[key]];
-      if (currentItem) {
-        items.push({ title: DAY_TYPE_TITLE_MAP[DAY_TYPE[key]], words: currentItem.map(item => allWords[item]) });
-      }
-    });
-
-    return items;
-  }, [allWords, brains]);
-
-  if (isRegisteredTodayLoading || brainsLoading || allWordsLoading) {
+  const { data: sections, loading: sectionsLoading } = useQuery(queries.getTodayWords, {
+    variables: { brains },
+    skip: brainsLoading,
+    defaultValue: [],
+  });
+  if (isRegisteredTodayLoading || brainsLoading || sectionsLoading) {
     return <div>Loading</div>;
   }
 
