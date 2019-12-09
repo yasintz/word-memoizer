@@ -7,7 +7,7 @@ function addDays(days: number, date?: Date) {
   return inlineDate;
 }
 
-enum DAY_TYPE {
+enum WORD_DAY_TYPE {
   READ = 'READ',
   WRITE = 'WRITE',
   LISTEN = 'LISTEN',
@@ -22,7 +22,14 @@ enum DAY_TYPE {
   REMEMBER_FOUR = 'REMEMBER_FOUR',
 }
 
-function getKeyByType(type: DAY_TYPE, date?: Date) {
+enum GRAMMER_DAY_TYPE {
+  LEARN = 'LEARN',
+  REMEMBER_ONE = 'REMEMBER_ONE',
+  REMEMBER_TWO = 'REMEMBER_TWO',
+  REMEMBER_THREE = 'REMEMBER_THREE',
+}
+
+function getKeyByType(type: WORD_DAY_TYPE | GRAMMER_DAY_TYPE, date?: Date) {
   const inlineDate = date || new Date();
   const day = inlineDate.getDate();
   const month = inlineDate.getMonth() + 1;
@@ -30,8 +37,9 @@ function getKeyByType(type: DAY_TYPE, date?: Date) {
 
   return `${type}_${day}_${month}_${year}`;
 }
+
 function getAllKeys() {
-  return objectKeys(DAY_TYPE).map(key => getKeyByType(DAY_TYPE[key]));
+  return objectKeys(WORD_DAY_TYPE).map(key => getKeyByType(WORD_DAY_TYPE[key]));
 }
 
-export { addDays, getAllKeys, getKeyByType, DAY_TYPE };
+export { addDays, getAllKeys, getKeyByType, WORD_DAY_TYPE, GRAMMER_DAY_TYPE };

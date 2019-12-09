@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Redirect } from 'react-router';
 import { useQuery } from 'yasintz-api-calls';
-import { NavLink } from 'react-router-dom';
 import styled from '~/styled';
-import { Container } from '~/components/ui';
 import { queries } from '~/api';
+import { Grammars } from './grammers';
+import { Words } from './words';
 
 /* Home Helpers */
 interface HomeProps {}
@@ -30,50 +30,23 @@ interface HomeProps {}
 
 const HomeWrapper = styled.div``;
 
-const StyledLi = styled.li``;
-
-const StyledWordText = styled.span`
-  margin: 0 16px;
-`;
-
 /* Home Component  */
 function Home(props: React.PropsWithChildren<HomeProps>) {
-  const { data: brains, loading: brainsLoading } = useQuery(queries.getBrainTodayBrains, { defaultValue: {} });
-  const { data: status, loading: isRegisteredTodayLoading } = useQuery(queries.isRegisteredToday);
-  const { data: sections, loading: sectionsLoading } = useQuery(queries.getTodayWords, {
-    variables: { brains },
-    skip: brainsLoading,
-    defaultValue: [],
-  });
-  if (isRegisteredTodayLoading || brainsLoading || sectionsLoading) {
+  const { data: status, loading } = useQuery(queries.isRegisteredToday);
+
+  if (loading) {
     return <div>Loading</div>;
   }
-
-  if (status && status.registered) {
-    return (
-      <Container>
-        <HomeWrapper>
-          {sections.map(({ words, title }) => (
-            <div key={title}>
-              <h3>{title}</h3>
-              <hr />
-              <ul>
-                {words.map(item => (
-                  <StyledLi key={item.id}>
-                    <StyledWordText>{item.text}</StyledWordText>
-                    <NavLink to={`detail/${item.id}`}>➙</NavLink>
-                  </StyledLi>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </HomeWrapper>
-      </Container>
-    );
-  }
-  if (status && !status.registered) {
+  if (!(status && status.registered)) {
     return <Redirect to="word-register" />;
   }
+
+  return (
+    <HomeWrapper>
+      <Grammars />
+      <Words />
+    </HomeWrapper>
+  );
 }
 
 const _Home = Home;

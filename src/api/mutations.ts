@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { makeid } from '~/utils';
 import { DATABASE_URL } from './constants';
-import { DAY_TYPE, getKeyByType, addDays } from './utils';
-import { getWordSchema, getBrainTodayBrainWordsSchema } from './schemas';
+import { WORD_DAY_TYPE, getKeyByType, addDays } from './utils';
+import { getWordSchema, getTodayBrainWordsSchema } from './schemas';
 
 interface Mutations {
   addWord: (s: { word: string }) => Promise<any>;
@@ -23,7 +23,7 @@ const mutations: Mutations = {
         {
           params: {
             action: 'push',
-            path: `words.${wordId}.detail.relations.${
+            path: `words[id=${wordId}].detail.relations.${
               type === 'opposite' ? 'oppositeMeaningWordIds' : 'synonymWordIds'
             }`,
             schema: getWordSchema(wordId),
@@ -42,7 +42,7 @@ const mutations: Mutations = {
         {
           params: {
             action: 'push',
-            path: `words.${wordId}.detail.images`,
+            path: `words[id=${wordId}].detail.images`,
             schema: getWordSchema(wordId),
           },
         },
@@ -59,7 +59,7 @@ const mutations: Mutations = {
         {
           params: {
             action: 'push',
-            path: `words.${wordId}.detail.links`,
+            path: `words[id=${wordId}].detail.links`,
             schema: getWordSchema(wordId),
           },
         },
@@ -73,11 +73,11 @@ const mutations: Mutations = {
       .put(
         DATABASE_URL,
         {
-          data: { [wordId]: { id: wordId, text: word } },
+          data: { id: wordId, text: word },
         },
         {
           params: {
-            action: 'assign',
+            action: 'push',
             path: 'words',
           },
         },
@@ -85,23 +85,35 @@ const mutations: Mutations = {
       .then(({ data }) => data);
   },
   registerWords: async ({ wordIds }) => {
-    const putData = {};
+    const putData = [];
     [
-      DAY_TYPE.READ,
-      DAY_TYPE.WRITE,
-      DAY_TYPE.LISTEN,
-      DAY_TYPE.ADDVERBS,
-      DAY_TYPE.SENTENCE_READ,
-      DAY_TYPE.SENTENCE_WRITE_PAST,
-      DAY_TYPE.SENTENCE_WRITE_PRESENT,
-      DAY_TYPE.SENTENCE_WRITE_FUTURE,
+      WORD_DAY_TYPE.READ,
+      WORD_DAY_TYPE.WRITE,
+      WORD_DAY_TYPE.LISTEN,
+      WORD_DAY_TYPE.ADDVERBS,
+      WORD_DAY_TYPE.SENTENCE_READ,
+      WORD_DAY_TYPE.SENTENCE_WRITE_PAST,
+      WORD_DAY_TYPE.SENTENCE_WRITE_PRESENT,
+      WORD_DAY_TYPE.SENTENCE_WRITE_FUTURE,
     ].forEach((dayType, index) => {
-      putData[getKeyByType(dayType, addDays(index * 2))] = wordIds;
+      putData.push({ id: getKeyByType(dayType, addDays(index * 2)), wordIds });
     });
-    putData[getKeyByType(DAY_TYPE.REMEMBER_ONE, addDays(30))] = wordIds;
-    putData[getKeyByType(DAY_TYPE.REMEMBER_TWO, addDays(45))] = wordIds;
-    putData[getKeyByType(DAY_TYPE.REMEMBER_THREE, addDays(90))] = wordIds;
-    putData[getKeyByType(DAY_TYPE.REMEMBER_FOUR, addDays(150))] = wordIds;
+    putData.push({
+      id: getKeyByType(WORD_DAY_TYPE.REMEMBER_ONE, addDays(30)),
+      wordIds,
+    });
+    putData.push({
+      id: getKeyByType(WORD_DAY_TYPE.REMEMBER_TWO, addDays(45)),
+      wordIds,
+    });
+    putData.push({
+      id: getKeyByType(WORD_DAY_TYPE.REMEMBER_THREE, addDays(90)),
+      wordIds,
+    });
+    putData.push({
+      id: getKeyByType(WORD_DAY_TYPE.REMEMBER_FOUR, addDays(150)),
+      wordIds,
+    });
 
     return axios
       .put(
@@ -109,8 +121,8 @@ const mutations: Mutations = {
         { data: putData },
         {
           params: {
-            schema: getBrainTodayBrainWordsSchema,
-            action: 'assign',
+            schema: getTodayBrainWordsSchema,
+            action: 'contact',
             path: 'brain',
           },
         },

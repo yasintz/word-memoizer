@@ -5,6 +5,11 @@ export interface WordLink {
   title: string;
 }
 
+export interface Brain {
+  id: string;
+  wordIds: string[];
+}
+
 export interface WordRelation {
   oppositeMeaningWordIds: string[];
   synonymWordIds: string[];
@@ -25,4 +30,14 @@ export interface Word {
 export interface GetWordRelationsQueryResult {
   oppositeMeaningWordIds: Word[];
   synonymWordIds: Word[];
+}
+
+export interface GrammerByDate {
+  id: string;
+  grammerId: string;
+}
+
+export interface Grammer {
+  id: string;
+  videoNumber: number;
 }

@@ -1,20 +1,25 @@
-import { DAY_TYPE } from '~/api/utils';
+import { WORD_DAY_TYPE, GRAMMER_DAY_TYPE } from '~/api/utils';
 
-export const TOKEN_KEY = 'token';
-
-const DAY_TYPE_TITLE_MAP: Record<DAY_TYPE, string> = {
-  [DAY_TYPE.READ]: 'Read',
-  [DAY_TYPE.WRITE]: 'Write',
-  [DAY_TYPE.LISTEN]: 'Listen',
-  [DAY_TYPE.ADDVERBS]: 'Adverbs Sentence',
-  [DAY_TYPE.SENTENCE_READ]: 'Sentence Read',
-  [DAY_TYPE.SENTENCE_WRITE_PAST]: 'Sentence Write Past',
-  [DAY_TYPE.SENTENCE_WRITE_PRESENT]: 'Sentence Write Present',
-  [DAY_TYPE.SENTENCE_WRITE_FUTURE]: 'Sentence write future',
-  [DAY_TYPE.REMEMBER_ONE]: 'Remember One',
-  [DAY_TYPE.REMEMBER_TWO]: 'Remember two',
-  [DAY_TYPE.REMEMBER_THREE]: 'Remember three',
-  [DAY_TYPE.REMEMBER_FOUR]: 'Remember four',
+const BRAIN_DAY_TYPE_TITLE_MAP: Record<WORD_DAY_TYPE, string> = {
+  [WORD_DAY_TYPE.READ]: 'Read',
+  [WORD_DAY_TYPE.WRITE]: 'Write',
+  [WORD_DAY_TYPE.LISTEN]: 'Listen',
+  [WORD_DAY_TYPE.ADDVERBS]: 'Adverbs Sentence',
+  [WORD_DAY_TYPE.SENTENCE_READ]: 'Sentence Read',
+  [WORD_DAY_TYPE.SENTENCE_WRITE_PAST]: 'Sentence Write Past',
+  [WORD_DAY_TYPE.SENTENCE_WRITE_PRESENT]: 'Sentence Write Present',
+  [WORD_DAY_TYPE.SENTENCE_WRITE_FUTURE]: 'Sentence write future',
+  [WORD_DAY_TYPE.REMEMBER_ONE]: 'Remember One',
+  [WORD_DAY_TYPE.REMEMBER_TWO]: 'Remember two',
+  [WORD_DAY_TYPE.REMEMBER_THREE]: 'Remember three',
+  [WORD_DAY_TYPE.REMEMBER_FOUR]: 'Remember four',
 };
 
-export { DAY_TYPE_TITLE_MAP };
+const GRAMMER_DAY_TYPE_TITLE_MAP: Record<GRAMMER_DAY_TYPE, string> = {
+  [GRAMMER_DAY_TYPE.LEARN]: 'Ogren',
+  [GRAMMER_DAY_TYPE.REMEMBER_ONE]: 'Hatirla 1',
+  [GRAMMER_DAY_TYPE.REMEMBER_TWO]: 'Hatirla 2',
+  [GRAMMER_DAY_TYPE.REMEMBER_THREE]: 'Hatirla 3',
+};
+
+export { BRAIN_DAY_TYPE_TITLE_MAP, GRAMMER_DAY_TYPE_TITLE_MAP };

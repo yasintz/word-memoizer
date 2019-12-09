@@ -4,7 +4,6 @@ import { useQuery } from 'yasintz-api-calls';
 import { RouteComponentProps } from 'react-router-dom';
 import styled from '~/styled';
 import { queries } from '~/api';
-import { Container } from '~/components/ui';
 import { Images } from './images';
 import { WordLinks } from './links';
 import { WordRelations } from './relation';
@@ -48,15 +47,13 @@ function WordDetail(props: React.PropsWithChildren<RouteComponentProps<WordDetai
   }
 
   return (
-    <Container>
-      <StyledWordDetailWrapper>
-        <h1>{currentWord.text}</h1>
-        <hr />
-        <WordLinks links={wordLinks} wordId={props.match.params.id} />
-        <WordRelations relations={wordRelations} wordId={props.match.params.id} />
-        <Images images={imageLinks} wordId={props.match.params.id} />
-      </StyledWordDetailWrapper>
-    </Container>
+    <StyledWordDetailWrapper>
+      <h1>{currentWord.text}</h1>
+      <hr />
+      <WordLinks links={wordLinks} wordId={props.match.params.id} />
+      <WordRelations relations={wordRelations} wordId={props.match.params.id} />
+      <Images images={imageLinks} wordId={props.match.params.id} />
+    </StyledWordDetailWrapper>
   );
 }
 const PureWordDetail = React.memo(WordDetail);

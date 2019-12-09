@@ -30,6 +30,7 @@ function WordRelations(props: React.PropsWithChildren<WordRelationsProps>) {
   const { data } = useQuery(queries.getWordRelations, {
     variables: { relations: props.relations },
     defaultValue: { oppositeMeaningWordIds: [], synonymWordIds: [] },
+    skip: props.relations.oppositeMeaningWordIds.length === 0 && props.relations.synonymWordIds.length === 0,
   });
   const [isShownRelationAddComp, setIsShownRelationAddComp] = React.useState(false);
   /* WordRelations Callbacks */
@@ -50,7 +51,7 @@ function WordRelations(props: React.PropsWithChildren<WordRelationsProps>) {
           <div>
             {data.oppositeMeaningWordIds.map(word => (
               <span key={word.text + word.text}>
-                <NavLink to={`/detail/${word.id}`}>{word.text}</NavLink> <span> - </span>
+                <NavLink to={`/word/${word.id}`}>{word.text}</NavLink> <span> - </span>
               </span>
             ))}
           </div>
@@ -63,7 +64,7 @@ function WordRelations(props: React.PropsWithChildren<WordRelationsProps>) {
           <div>
             {data.synonymWordIds.map(word => (
               <span key={word.text + word.text}>
-                <NavLink to={`/detail/${word.id}`}>{word.text}</NavLink> <span> - </span>
+                <NavLink to={`/word/${word.id}`}>{word.text}</NavLink> <span> - </span>
               </span>
             ))}
           </div>

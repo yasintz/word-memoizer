@@ -1,47 +1,87 @@
 import axios from 'axios';
-import { Word, WordRelation, GetWordRelationsQueryResult } from '~/helpers';
-import { DAY_TYPE, getKeyByType } from '../utils';
+import { Word, WordRelation, GetWordRelationsQueryResult, Brain, GrammerByDate, Grammer } from '~/helpers';
+import { WORD_DAY_TYPE, getKeyByType } from '../utils';
 import { DATABASE_URL } from '../constants';
-import { getWordSchema, getBrainSchema, getBrainTodayBrainWordsSchema } from '../schemas';
-import { getBrainTodayBrainWordsResultHandler, getWordRelationsResultHandler } from './data-parser';
+import {
+  getWordSchema,
+  getBrainSchema,
+  getTodayBrainWordsSchema,
+  getWordsByIdsWithoutDetailSchema,
+  getWordsWithoutDetailSchema,
+  getTodayGrammersSchema,
+  getGrammerSchema,
+} from '../schemas';
+import { getWordRelationsResultHandler, brainArrayParser } from './data-parser';
 import { objectKeys } from '~/utils';
-import { DAY_TYPE_TITLE_MAP } from '~/utils/constants';
+import { BRAIN_DAY_TYPE_TITLE_MAP } from '~/utils/constants';
 
 interface Queries {
-  getWords: () => Promise<Record<string, Word>>;
+  getWords: () => Promise<Word[]>;
+  getTodayGrammarsByDate: () => Promise<GrammerByDate[]>;
   getWord: (s: { id: string }) => Promise<Word>;
-  isRegisteredToday: () => Promise<{ registered: boolean }>;
-  getBrainTodayBrains: () => Promise<Record<DAY_TYPE, string[]>>;
-  getAllBrainIds: () => Promise<string[]>;
+  getTodayBrains: () => Promise<Brain[]>;
+  isRegisteredToday: () => Promise<{ registered: boolean; id: string }>;
+  getAllBrainIds: () => Promise<{ id: string; wordIds: string[] }>;
   getWordRelations: (s: { relations: WordRelation }) => Promise<GetWordRelationsQueryResult>;
-  getTodayWords: (s: { brains: Record<DAY_TYPE, string[]> }) => Promise<Array<{ title: string; words: Word[] }>>;
+  getTodayWords: (s: { brains: Brain[] }) => Promise<Array<{ title: string; words: Word[] }>>;
+  getGrammerById: (s: { id: string }) => Promise<Grammer>;
 }
 
 const queries: Queries = {
+  getGrammerById: ({ id }) =>
+    axios
+      .get(DATABASE_URL, { params: { schema: getGrammerSchema(id), queryName: 'getGrammerById' } })
+      .then(({ data }) => data.result),
+  getTodayGrammarsByDate: () => {
+    return axios
+      .get(DATABASE_URL, {
+        params: { schema: getTodayGrammersSchema, queryName: 'getTodayGrammers' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(({ data }) => (data.result ? data.result : []));
+  },
+  isRegisteredToday: () => {
+    const schema = `
+    @{
+      brain @arrayFindEqualsByKey(id,${getKeyByType(WORD_DAY_TYPE.READ)});
+      * @getByPath(brain);
+    } 
+    `;
+
+    return axios
+      .get(DATABASE_URL, {
+        params: { schema, queryName: 'isRegistered' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(({ data }) => ({ registered: Boolean(data.result && data.result.id), id: `isRegisteredToday_query` }));
+  },
   getTodayWords: async ({ brains }) => {
     const usedWordIds: string[] = [];
+    const parsedBrains = brainArrayParser(brains);
 
-    objectKeys(DAY_TYPE).forEach(key => {
-      const currentItem = brains[DAY_TYPE[key]];
+    objectKeys(WORD_DAY_TYPE).forEach(key => {
+      const currentItem = parsedBrains[WORD_DAY_TYPE[key]];
       if (currentItem) {
         usedWordIds.push(...currentItem);
       }
     });
 
-    const schema = `
-    WordType{${usedWordIds.join(';')};}
-    @{
-      words: WordType;
-      * @getByKey(words);
-    } 
-    `;
+    const schema = getWordsByIdsWithoutDetailSchema(usedWordIds);
 
-    return axios.get(DATABASE_URL, { params: { schema } }).then(({ data: { result } }) => {
-      const items: Array<{ title: string; words: Word[] }> = [];
-      objectKeys(DAY_TYPE).forEach(key => {
-        const currentItem = brains[DAY_TYPE[key]];
+    return axios.get(DATABASE_URL, { params: { schema, queryName: 'getTodayWords' } }).then(({ data: { result } }) => {
+      const items: Array<{ title: string; words: Word[]; id: string }> = [];
+      objectKeys(WORD_DAY_TYPE).forEach(key => {
+        const currentItem = parsedBrains[WORD_DAY_TYPE[key]];
         if (currentItem) {
-          items.push({ title: DAY_TYPE_TITLE_MAP[DAY_TYPE[key]], words: currentItem.map(item => result[item]) });
+          items.push({
+            title: BRAIN_DAY_TYPE_TITLE_MAP[WORD_DAY_TYPE[key]],
+            words: currentItem.map(item => result.find(word => word.id === item)),
+            id: `${WORD_DAY_TYPE[key]}_${currentItem.join('_')}_today_brains`,
+          });
         }
       });
 
@@ -50,23 +90,17 @@ const queries: Queries = {
   },
   getWordRelations: ({ relations }) => {
     const relationsObj = { oppositeMeaningWordIds: [], synonymWordIds: [], ...relations };
-    const usedIds = [...relationsObj.oppositeMeaningWordIds, ...relationsObj.synonymWordIds].join(';');
-    const schema = `
-    WordType{${usedIds};}
-    @{
-      words: WordType;
-      * @getByKey(words);
-    } 
-    `;
+    const usedIds = [...relationsObj.oppositeMeaningWordIds, ...relationsObj.synonymWordIds];
+    const schema = getWordsByIdsWithoutDetailSchema(usedIds);
 
     return axios
-      .get(DATABASE_URL, { params: { schema } })
+      .get(DATABASE_URL, { params: { schema, queryName: 'getWordRelations' } })
       .then(({ data: { result } }) => getWordRelationsResultHandler(relationsObj, result));
   },
   getWord: ({ id }) => {
     return axios
       .get(DATABASE_URL, {
-        params: { schema: getWordSchema(id) },
+        params: { schema: getWordSchema(id), queryName: 'getWord' },
         headers: {
           'Content-Type': 'application/json',
         },
@@ -74,68 +108,40 @@ const queries: Queries = {
       .then(({ data }) => data.result);
   },
   getAllBrainIds: () => {
-    return axios.get(DATABASE_URL, { params: { schema: getBrainSchema } }).then(({ data }) => {
-      const ids: string[] = [];
-      Object.keys(data.result).forEach(key => {
-        ids.push(...data.result[key]);
-      });
+    return axios
+      .get(DATABASE_URL, { params: { schema: getBrainSchema, queryName: 'getAllBrainIds' } })
+      .then(({ data }) => {
+        const ids: string[] = [];
+        Object.keys(data.result).forEach(key => {
+          ids.push(...data.result[key]);
+        });
 
-      const result = [];
-      new Set(ids).forEach(item => {
-        result.push(item);
-      });
+        const result = Array.from(new Set(ids));
 
-      return result;
-    });
+        return { id: `${result.join('_')}_getAllBrainds`, wordIds: result };
+      });
   },
   getWords: () => {
-    const schema = `
-   @{
-      words;
-      * @getByKey(words); 
-    } 
-    `;
+    const schema = getWordsWithoutDetailSchema;
 
     return axios
       .get(DATABASE_URL, {
-        params: { schema },
+        params: { schema, queryName: 'getWords' },
         headers: {
           'Content-Type': 'application/json',
         },
       })
       .then(({ data }) => data.result);
   },
-
-  isRegisteredToday: () => {
-    const schema = `
-    @{
-      brain @getByKey(${getKeyByType(DAY_TYPE.READ)});
-      * @getByKey(brain);
-    } 
-    `;
-
+  getTodayBrains: () => {
     return axios
       .get(DATABASE_URL, {
-        params: { schema },
+        params: { schema: getTodayBrainWordsSchema, queryName: 'getBrainTodayBrains' },
         headers: {
           'Content-Type': 'application/json',
         },
       })
-      .then(({ data }) => ({ registered: Boolean(data.result) }));
-  },
-  getBrainTodayBrains: () => {
-    return axios
-      .get(DATABASE_URL, {
-        params: { schema: getBrainTodayBrainWordsSchema },
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      .then(({ data }) => {
-        const brains = getBrainTodayBrainWordsResultHandler(data.result);
-
-        return brains;
-      });
+      .then(({ data }) => data.result);
   },
 };
 

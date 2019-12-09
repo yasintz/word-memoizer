@@ -5,7 +5,6 @@ import styled, { colors } from '~/styled';
 import { queries, mutations } from '~/api';
 import { objectKeys } from '~/utils';
 import { Container, UIButton } from '~/components/ui';
-import { getBrainTodayBrainWordsResultHandler } from '~/api/queries/data-parser';
 
 /* WordRegister Helpers */
 interface WordRegisterProps {}
@@ -35,8 +34,10 @@ const StyledActionButton = styled.strong`
 /* WordRegister Component  */
 function WordRegister(props: React.PropsWithChildren<RouteComponentProps<WordRegisterProps>>) {
   /* WordRegister Variables */
-  const { data, loading, error } = useQuery(queries.getWords, { defaultValue: {} });
-  const { data: allBrains, loading: allBrainsLoading } = useQuery(queries.getAllBrainIds, { defaultValue: [] });
+  const { data, loading, error } = useQuery(queries.getWords, { defaultValue: [] });
+  const { data: allBrains, loading: allBrainsLoading } = useQuery(queries.getAllBrainIds, {
+    defaultValue: { wordIds: [] },
+  });
   const { data: status, loading: isRegisteredTodayLoading } = useQuery(queries.isRegisteredToday);
   const [inputValue, setInputValue] = React.useState('');
   const [shownWordLenght, setShownWordLength] = React.useState(15);
@@ -44,11 +45,13 @@ function WordRegister(props: React.PropsWithChildren<RouteComponentProps<WordReg
   const { mutation } = useMutation(mutations.registerWords, {
     variables: { wordIds: selectedWordIds },
     refetchQueries: [
-      refetchFactory(queries.getBrainTodayBrains, {
+      refetchFactory(queries.getTodayBrains, {
         type: 'chain',
-        dataHandler: mr => getBrainTodayBrainWordsResultHandler(mr),
       }),
-      refetchFactory(queries.isRegisteredToday, { type: 'chain', dataHandler: () => ({ registered: true }) }),
+      refetchFactory(queries.isRegisteredToday, {
+        type: 'chain',
+        dataHandler: (mr, prev) => ({ ...prev, registered: true }),
+      }),
     ],
   });
 
@@ -56,13 +59,16 @@ function WordRegister(props: React.PropsWithChildren<RouteComponentProps<WordReg
     if (inputValue) {
       return objectKeys(data)
         .map(item => data[item])
-        .filter(({ text, id }) => text.includes(inputValue) && !selectedWordIds.includes(id) && !allBrains.includes(id))
+        .filter(
+          ({ text, id }) =>
+            text.includes(inputValue) && !selectedWordIds.includes(id) && !allBrains.wordIds.includes(id),
+        )
         .slice(0, shownWordLenght);
     }
 
     return objectKeys(data)
       .map(item => data[item])
-      .filter(({ id }) => !selectedWordIds.includes(id) && !allBrains.includes(id))
+      .filter(({ id }) => !selectedWordIds.includes(id) && !allBrains.wordIds.includes(id))
       .slice(0, shownWordLenght);
   }, [inputValue, data, shownWordLenght, selectedWordIds, allBrains]);
   /* WordRegister Callbacks */
@@ -113,7 +119,7 @@ function WordRegister(props: React.PropsWithChildren<RouteComponentProps<WordReg
                 <StyledActionButton onClick={() => setSelectedWordIds(selectedWordIds.filter(item => item !== id))}>
                   -
                 </StyledActionButton>
-                <StyledWordText>{data[id].text}</StyledWordText>
+                <StyledWordText>{data.find(item => item.id === id).text}</StyledWordText>
               </li>
             ))}
           </ul>

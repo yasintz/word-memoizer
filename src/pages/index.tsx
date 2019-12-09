@@ -7,6 +7,7 @@ import { WordDetail } from './word-detail';
 import { Page404 } from './404-component';
 import styled from '~/styled';
 import { Container } from '~/components/ui';
+import { GrammerDetail } from './grammer-detail';
 
 interface IRoute {
   path: string;
@@ -23,8 +24,12 @@ const routes: IRoute[] = [
     component: WordRegister,
   },
   {
-    path: '/detail/:id',
+    path: '/word/:id',
     component: WordDetail,
+  },
+  {
+    path: '/grammer/:id',
+    component: GrammerDetail,
   },
 ];
 
